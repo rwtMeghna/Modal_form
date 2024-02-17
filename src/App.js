@@ -1,109 +1,129 @@
-import React, { useState ,useEffect} from "react";
+import React, { useState } from "react";
 
-function App() {
+
+const App = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [dob, setDob] = useState("");
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    dob: "",
+    phone: "",
+  });
+  const [errorMessage, setErrorMessage] = useState("");
 
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData({
+      ...formData,
+      [id]: value,
+    });
+  };
 
-
-
-  useEffect(() => {
-    const handleOutsideClick = (e) => {
-      if (isOpen && e.target.closest(".modal") === null) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("click", handleOutsideClick);
-
-    return () => {
-      document.removeEventListener("click", handleOutsideClick);
-    };
-  }, [isOpen]);
-
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!username || !email || !phone || !dob) {
-      alert("Please fill in all fields.");
+  const handleSubmit = () => {
+    if (
+      !formData.username ||
+      !formData.email ||
+      !formData.dob ||
+      !formData.phone
+    ) {
+      setErrorMessage("Please fill out all the fields.");
       return;
     }
-    if (!email.includes("@")) {
-      alert("Invalid email. Please check your email address.");
+
+    if (!formData.email.includes("@")) {
+      setErrorMessage("Invalid email. Please check your email address.");
       return;
     }
-    if (!/^\d{10}$/.test(phone)) {
-      alert("Invalid phone number. Please enter a 10-digit phone number.");
+
+    if (formData.phone.length !== 10 || isNaN(formData.phone)) {
+      setErrorMessage(
+        "Invalid phone number. Please enter a 10-digit phone number.",
+      );
       return;
     }
-    const dobDate = new Date(dob);
+
+    const dobDate = new Date(formData.dob);
     const currentDate = new Date();
+
     if (dobDate > currentDate) {
-      alert("Invalid date of birth. Please enter a valid date.");
+      setErrorMessage("Invalid date of birth. Please enter a valid date.");
       return;
     }
-    // Submit logic here
-    setUsername("");
-    setEmail("");
-    setPhone("");
-    setDob("");
+
+    // Reset form data, error message, and close modal
+    setFormData({
+      username: "",
+      email: "",
+      dob: "",
+      phone: "",
+    });
+    setErrorMessage("");
     setIsOpen(false);
   };
 
+  const handleCloseModal = (e) => {
+    if (e.target.classList.contains("modal-content")) {
+      setIsOpen(false);
+    }
+  };
+
   return (
-    <div className="modal">
+    <div className={`modal ${isOpen ? "open" : ""}`} onClick={handleCloseModal}>
       <h1>User Details Modal</h1>
       <button onClick={() => setIsOpen(true)}>Open Form</button>
-      {isOpen && (
-        <div className="modal-content">
-          <form onSubmit={handleSubmit}>
-            <label htmlFor="username">Username:</label>
+      <div
+        className={`modal-content ${isOpen ? "open" : ""}`}
+        onClick={(e) => e.stopPropagation()}>
+        <form>
+          <div className="form-group">
+            <h2>Username:</h2>
             <input
               type="text"
               id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={formData.username}
+              onChange={handleInputChange}
               required
             />
-            <br />
-            <label htmlFor="email">Email :</label>
+          </div>
+          <div className="form-group">
+            <h2>Email:</h2>
             <input
-              type="text"
+              type="email"
               id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              pattern=".+@.+" // Regex pattern for checking if '@' is present
-              title={`Please include an '@' symbol in the email address.${email} is missing in '@'.`} // Custom error message
+              value={formData.email}
+              onChange={handleInputChange}
+              required
             />
-
-            <br />
-            <label htmlFor="phone">Phone:</label>
+          </div>
+          <div className="form-group">
+            <h2>Phone Number:</h2>
             <input
-              type="text"
+              type="tel"
               id="phone"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              value={formData.phone}
+              onChange={handleInputChange}
+              required
             />
-            <br />
-            <label htmlFor="dob">Date of Birth:</label>
+          </div>
+          <div className="form-group">
+            <h2>Date of Birth:</h2>
             <input
               type="date"
               id="dob"
-              value={dob}
-              onChange={(e) => setDob(e.target.value)}
+              value={formData.dob}
+              onChange={handleInputChange}
+              required
             />
-            <br />
-            <button type="submit" className="submit-button">
-              Submit
-            </button>
-          </form>
-        </div>
-      )}
+          </div>
+          {errorMessage && <p className="error-message">{errorMessage}</p>}
+          <button className="submit-button" onClick={handleSubmit}>
+            Submit
+          </button>
+        </form>
+        <div className="modal-close"></div>
+      </div>
     </div>
   );
-}
+};
 
 export default App;
