@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
@@ -6,6 +6,24 @@ function App() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [dob, setDob] = useState("");
+
+
+
+
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (isOpen && e.target.closest(".modal") === null) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("click", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("click", handleOutsideClick);
+    };
+  }, [isOpen]);
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
